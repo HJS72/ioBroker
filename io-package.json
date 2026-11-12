@@ -162,8 +162,7 @@
         "username": "",
         "client_secret": "",
         "school": "",
-        "baseUrl": "",
-        "accounts_json": ""
+        "baseUrl": ""
     },
     "protectedNative": [
         "client_secret",

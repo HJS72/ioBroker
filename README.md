@@ -49,25 +49,35 @@ now go to the configuration-window in iobroker
 after the insert of your Username (child or parent) and the password for this account, you can take 
 the school-secret and the school-basr-Url to the configuration.
 
-Save to start polling. The existing account (or anonymous class) is available as
-`accounts.primary`. Add other children's logins under **Additional accounts**;
-each needs a unique ID, username, password, school name and WebUntis host.
-IDs may contain letters, numbers, underscores and hyphens; `primary` is reserved.
+Save to start polling. Each adapter instance uses one account or anonymous
+class. For another child, create a second WebUntis instance in ioBroker Admin
+and configure its school and login separately.
 This version requires js-controller 3.0 or later and Admin 4.0.10 or later for
 automatic encryption and decryption of configuration.
 Passwords are stored in ioBroker's encrypted native configuration. Keep access to
 ioBroker Admin and backups restricted because they contain children's information.
 
-Each `accounts.<ID>.timetable` state contains JSON with `startDate`, `endDate`
-and the WebUntis `lessons` array for the current local Monday through Sunday.
+Each instance's `accounts.primary.timetable` state contains JSON with `startDate`, `endDate`
+and the WebUntis `lessons` array for the current local Monday through Friday.
+The states `accounts.primary.montag`, `.dienstag`, `.mittwoch`, `.donnerstag`
+and `.freitag` each contain JSON with `date` and that day's `lessons`, sorted
+by start time. Days without lessons have an empty array.
+Individual states are available at `timetable.<day>.<lesson>`,
+for example `webuntis.0.timetable.montag.1.START`. Lessons are numbered
+from 1 in start-time order. Each has `START` and `END` (`HH:MM`), `FACH`,
+`ORT`, `LEHRER`, `STATUS`, `INFO` and `VERTRETUNG`. Each day has `DATUM`
+and `ANZAHL` states. Multiple subjects, rooms or teachers are comma-separated.
+The legacy `0` and `1` daily timetable branches are removed when the instance
+starts. Old adapter-created username timetable branches are removed after a
+successful refresh; unrelated objects are retained.
 Dates and lesson fields come from WebUntis. The `connection` and `lastUpdated`
 states indicate whether the last refresh succeeded and when data was last updated.
 On failure the last successful timetable remains available; check `connection`
-and `lastUpdated` before using it. Polling retries hourly. The original daily,
-inbox and news states remain available for the primary account only. Anonymous
-mode applies to the primary class; additional accounts use individual logins.
-Removing or renaming an account does not delete its old states; remove those
-states manually if they are no longer needed.
+and `lastUpdated` before using it. Polling retries hourly. Inbox and news states
+remain available for the configured account. Previously
+configured additional accounts are no longer polled. Their old encrypted
+configuration and states may remain; legacy credentials stay protected, and old
+states can be removed manually if no longer needed.
 
 Login and timetable access depend on school permissions and WebUntis API
 compatibility. Parent accounts only return the timetable exposed by WebUntis for
